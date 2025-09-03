@@ -31,7 +31,7 @@ namespace PointsBet_Backend_Online_Code_Test
 
             // empty array check to prevent runtime errors
             if (items.Length == 0)
-                throw new ArgumentException("Items array cannot be empty.", nameof(items));
+                throw new ArgumentException("Items array cannot be empty", nameof(items));
 
             // handle null item by converting to empty strings
             var quotedItems = items.Select(item => $"{quote}{item ?? string.Empty}{quote}");
