@@ -13,7 +13,7 @@ namespace PointsBet_Backend_Online_Code_Test
         /// <returns>Comma-separated string with quoted items</returns>
         /// <exception cref="ArgumentNullException">Thrown when items array is null</exception>
         /// <exception cref="ArgumentException">Thrown when items array is empty</exception>
-        public static string ToCommaSeparatedList(string[] items, string quote = "\"")
+        public static string ToCommaSeparatedString(string[] items, string quote = "\"")
         {
             // null check for the items array
             if (items == null)
@@ -26,6 +26,25 @@ namespace PointsBet_Backend_Online_Code_Test
             // handle null item by converting to empty strings
             var quotedItems = items.Select(item => $"{quote}{item ?? string.Empty}{quote}");
             return string.Join(", ", quotedItems);
+        }
+
+        class Program
+        {
+            static void Main(string[] args)
+            {
+                // Example input
+                string[] items = { "apple", "banana", "cherry" };
+
+                // Call your formatter
+                string result = StringFormatter.ToCommaSeparatedString(items);
+
+                // Print result
+                Console.WriteLine(result);
+
+                // With a different quote
+                string singleQuoteResult = StringFormatter.ToCommaSeparatedString(items, "'");
+                Console.WriteLine(singleQuoteResult);
+            }
         }
     }
 }
