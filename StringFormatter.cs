@@ -1,50 +1,61 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-
+using System.Text;
 namespace PointsBet_Backend_Online_Code_Test
 {
     public class StringFormatter
     {
+        private const int MaxItemLength = 1024;
+
         /// <summary>
-        /// Converts an array of strings to a comma-separated list with each item wrapped in quotes.
+        /// Joins a collection of strings into a comma-separated string wrapping each item in the given quote.
+        /// Skips invalid items (null, empty, whitespace, non-alphanumeric character, or exceeding <see cref="MaxItemLength"/> characters).
         /// </summary>
-        /// <param name="items">Array of strings to format</param>
-        /// <param name="quote">Quote character to wrap around each item</param>
-        /// <returns>Comma-separated string with quoted items</returns>
-        /// <exception cref="ArgumentNullException">Thrown when items array is null</exception>
-        /// <exception cref="ArgumentException">Thrown when items array is empty</exception>
-        public static string ToCommaSeparatedString(string[] items, string quote = "\"")
+        /// <param name="items">Strings to include.</param>
+        /// <param name="quote">Quote character to wrap each item.</param>
+        /// <returns>Comma-separated quoted string of valid items.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when items or quote is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when items is empty or quote is whitespace.</exception>
+        public static string ToCommaSeparatedString(IEnumerable<string> items, string quote = "\"")
         {
-            // null check for the items array
-            if (items == null)
-                throw new ArgumentNullException(nameof(items), "Items array cannot be null");
+            ArgumentNullException.ThrowIfNull(items);
+            ArgumentException.ThrowIfNullOrWhiteSpace(quote, nameof(quote));
 
-            // empty array check to prevent runtime errors
-            if (items.Length == 0)
-                throw new ArgumentException("Items array cannot be empty", nameof(items));
+            if (quote.Length != 1 || char.IsLetterOrDigit(quote[0]))
+                throw new ArgumentException("Quote must be a single non-alphanumeric character.", nameof(quote));
 
-            // handle null item by converting to empty strings
-            var quotedItems = items.Select(item => $"{quote}{item ?? string.Empty}{quote}");
-            return string.Join(", ", quotedItems);
+            var sb = new StringBuilder(256);
+            bool isFirst = true;
+
+            foreach (var item in items)
+            {
+                if (!IsValidItem(item)) continue;
+
+                var trimmed = item.Trim();
+
+                if (!isFirst)
+                    sb.Append(',');
+                else
+                    isFirst = false;
+
+                sb.Append(quote).Append(trimmed).Append(quote);
+            }
+
+            return sb.ToString();
         }
 
-        class Program
+        /// <summary>
+        /// Checks if a string is non-empty, within length and has atleast one letter or number.
+        /// </summary>
+        private static bool IsValidItem(string value)
         {
-            static void Main(string[] args)
-            {
-                // Example input
-                string[] items = { "apple", "banana", "cherry" };
+            if (string.IsNullOrWhiteSpace(value)) return false;
 
-                // Call your formatter
-                string result = StringFormatter.ToCommaSeparatedString(items);
+            var trimmed = value.Trim();
+            if (trimmed.Length > MaxItemLength) return false;
 
-                // Print result
-                Console.WriteLine(result);
-
-                // With a different quote
-                string singleQuoteResult = StringFormatter.ToCommaSeparatedString(items, "'");
-                Console.WriteLine(singleQuoteResult);
-            }
+            return trimmed.Any(char.IsLetterOrDigit);
         }
     }
 }
